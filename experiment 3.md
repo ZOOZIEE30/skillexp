@@ -8,7 +8,7 @@ Introduction to Encoding Techniques
 <br>
 Ordinal Encoding: Assigns unique integers to categories with an inherent order. This method is best suited for ordinal data where categories have a meaningful sequence.
 <br>
-Concepts Used
+Concepts Used-
 <br>
 Pandas Library: For data manipulation and analysis.
 One-Hot Encoding: Converting categorical data to binary columns.
@@ -64,4 +64,4 @@ print("encoded data: ",encoded_data)
 
 ```
 <br>
-thankyouu
+
