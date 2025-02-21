@@ -2,15 +2,23 @@
 <br> This repository contains the code and results for the first experiment in the Data Science Fundamentals with Python course. The objective of this experiment is to load and merge datasets obtained from the UCI Machine Learning Repository.
 
 Steps-
+<br>
 Loading Datasets: The datasets are loaded using the Pandas library from the UCI ML Repository.
+<br>
 Inspecting Datasets: The first few rows of each dataset are displayed to understand their structure.
+<br>
 Merging Datasets: The datasets are merged on a common column (e.g., 'ID').
+<br>
 Saving the Merged Dataset: The merged dataset is optionally saved as a CSV file.
+<br>
 
 
 Concepts Used-
+<br>
 Pandas Library: Used for data manipulation and analysis.
+<br>
 DataFrames: Data structures provided by Pandas to store and manipulate tabular data.
+<br>
 Merging Datasets: The pd.merge() function is used to combine two datasets based on a common key.
 
 <br>
