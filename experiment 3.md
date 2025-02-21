@@ -16,7 +16,7 @@ Ordinal Encoding: Encoding ordinal data into integer values based on a predefine
 <br>
 
 ```
-#EXP 3: ENCODING
+
 #1. label encoding
 from sklearn.preprocessing import LabelEncoder
 data=['Low','High','Medium','High','Medium']
