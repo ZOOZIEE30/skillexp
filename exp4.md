@@ -3,7 +3,7 @@
 
 Steps-
 <br>
-Import Required Libraries:
+Import Required Libraries:-
 <br>
 pandas: This library helps you handle and manipulate data easily.
 MinMaxScaler and StandardScaler: These are from sklearn.preprocessing, and are used to scale the data to specific ranges.
