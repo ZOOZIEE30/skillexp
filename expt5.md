@@ -1,63 +1,60 @@
-# EXPERIMENT 5
-<br> This repository contains the code and results for the foyrth experiment in the Data Science Fundamentals with Python course. The objective of this experiment is to data visualization using matplot library part-1 using data set obtained from UCIML repository 
-Steps-
-<br>
-Import Libraries:
-<br>
+# EXPERIMENT 5 
+## Introduction 
+This repository contains the code and results for the foyrth experiment in the Data Science Fundamentals with Python course. The objective of this experiment is to data visualization using matplot library part-1 using data set obtained from UCIML repository 
+## Steps-
+
+### 1.Import Libraries:
+
 Import necessary libraries: pandas for data handling, matplotlib for plotting, and seaborn for advanced visualizations.
-<br>
-Load Dataset:
-<br>
+
+### 2.Load Dataset:
 Load the dataset using pd.read_csv(), specifying the correct delimiter (semicolon ; in this case).
-<br>
-Clean Column Names:
-<br>
+
+### 3.Clean Column Names:
 Strip any leading or trailing spaces from the column names to avoid reference issues when accessing columns.
-<br>
-Check Data:
-<br>
+
+### 4.Check Data:
+
 Inspect the first few rows (head()) and column names (columns) to understand the dataset structure.
-<br>
-Handle Missing Values:
-<br>
+
+### 5.Handle Missing Values:
+
 Fill any missing values in numeric columns with the mean of each respective column.
-<br>
-Histogram:
-<br>
+### 6.Plotting 
+### a)Histogram:
+
 Plot a histogram of the alcohol column to visualize its distribution.
-<br>
-Box Plot:
-<br>
+
+### b)Box Plot:
+
 Create a box plot for the fixed acidity column to identify its distribution and potential outliers.
-<br>
-Scatter Plot:
-<br>
+
+### c)Scatter Plot:
 Plot a scatter plot between fixed acidity and citric acid to see their relationship.
-<br>
-Correlation Heatmap:
-<br>
+
+### d)Correlation Heatmap:
+
 Generate a heatmap to show the correlation between different numeric features in the dataset.
-<br>
-Data Insights:
-<br>
+
+### 7.Data Insights:
+
 Check for missing values in the dataset and print the summary statistics for the numeric columns.
-<br>
 
 
-concepts used :
-<br>
+## Concepts used :
+
 Data Loading: Load the dataset from a CSV file.
-<br>
+
 Data Cleaning: Clean column names and fill missing values with the mean.
-<br>
+
 Data Visualization:
 Histograms: Show distribution of a feature.
 Box Plots: Show spread and outliers.
 Scatter Plots: Show relationships between two features.
 Correlation Heatmap: Show correlations between features.
-<br>
+
 EDA: Check for missing values and generate summary statistics.
-<br>
+
 
 ```
 import pandas as pd
@@ -137,4 +134,4 @@ print(data.describe())
 
 
 ```
-<br>
+
