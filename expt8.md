@@ -1,4 +1,4 @@
-### EXPERIMENT 8: Feature Selection Techniques (Part 2)
+# EXPERIMENT 8: Feature Selection Techniques (Part 2)
 ## Introduction
  
 This repository contains the code and results for Experiment 7 in the Data Science Fundamentals with Python course. The objective of this experiment is to apply advanced feature selection techniques to the Iris Dataset from the UCI Machine Learning Repository. We will use several techniques such as Univariate Feature Selection (SelectKBest), Recursive Feature Elimination (RFE), and Feature Importance using Random Forest to identify the most relevant features in the dataset.
