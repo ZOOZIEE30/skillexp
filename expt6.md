@@ -75,10 +75,49 @@ plt.show()
 ```
 ### b) Wrapper Method: Recursive Feature Elimination (RFE
 Apply RFE with a LogisticRegression model to select the top 3 features.
+```
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
 
+# Separate the features and target variable
+X = df.drop('species', axis=1)
+y = df['species']
+
+# Create a logistic regression model
+model = LogisticRegression(max_iter=200)
+
+# Apply RFE to select the top 3 features
+selector = RFE(model, 3)
+selector = selector.fit(X, y)
+
+# Print the features selected by RFE
+selected_features = X.columns[selector.support_]
+print("Selected features:", selected_features)
+```
 ### c) Embedded Method: Feature Importance Using Random Forest
 Use Random Forest to compute feature importance, which is an embedded method of feature selection.
+```
+from sklearn.ensemble import RandomForestClassifier
 
+# Train a random forest classifier
+rf = RandomForestClassifier()
+rf.fit(X, y)
+
+# Get feature importance
+feature_importance = pd.Series(rf.feature_importances_, index=X.columns)
+
+# Plot feature importance
+plt.figure(figsize=(10, 6))
+feature_importance.sort_values().plot(kind='barh')
+plt.title('Feature Importance from Random Forest')
+plt.xlabel('Importance')
+plt.ylabel('Features')
+plt.show()
+
+# Print the feature importance values
+print("Feature Importances:")
+print(feature_importance)
+```
 
 ## Concepts used :
 
