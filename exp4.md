@@ -1,7 +1,7 @@
 # EXPERIMENT 4
 <br> This repository contains the code and results for the foyrth experiment in the Data Science Fundamentals with Python course. The objective of this experiment is to perform data pre-processing (normalizing,scaling and balancing data set )on the csv file taken from UCIML 
 
-Steps-
+## Steps-
 <br>
 Import Required Libraries:-
 <br>
@@ -61,38 +61,11 @@ Train-Test Split: Dividing data into training and testing sets
 <br>
 
 ```
-import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-
-# Load the dataset (make sure to provide the correct path)
-data = pd.read_csv('/content/drive/MyDrive/winequality-white.csv', sep=';')  # Replace with your actual file path
-
-# Handle missing values in numeric columns by filling with the mean of each column
-numeric_columns = data.select_dtypes(include=['float64', 'int64']).columns  # Select only numeric columns
-data[numeric_columns] = data[numeric_columns].fillna(data[numeric_columns].mean())
-
-# Select only numeric columns (excluding the target column)
-numeric_data = data.select_dtypes(include=['float64', 'int64']).iloc[:, :-1]  # Excluding the target column
-
-# Check if numeric_data is empty or not
-if numeric_data.empty:
-    print("Error: No numeric data available for normalization.")
-else:
-    # Initialize the MinMaxScaler
-    scaler = MinMaxScaler()
-
-    # Normalize the data (scaling to a range of 0-1)
-    try:
-        normalized_data = scaler.fit_transform(numeric_data)
-        
-        # Convert the normalized data back into a DataFrame (optional)
-        normalized_data_df = pd.DataFrame(normalized_data, columns=numeric_data.columns)
-        
-        # Verify the result
-        print(normalized_data_df.head())
-    except Exception as e:
-        print(f"Error during normalization: {e}")
-
-
+import numpy as np
+data= np.array([[100],[200],[300],[400],[500]])
+scaler= MinMaxScaler(feature_range=(0,1))
+scaled_data=scaler.fit_transform(data)
+print(scaled_data)
 ```
 <br>
