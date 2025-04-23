@@ -175,7 +175,7 @@ plt.show()
 #### output 
 ![download](https://github.com/user-attachments/assets/cef74a9a-1ad4-4d25-b60c-387bd99282b3)
 
-###Exploring DoS and ReDoS Attack Patterns in the Dataset
+### Exploring DoS and ReDoS Attack Patterns in the Dataset
 ```
 # Preview category/subcategory values
 print("Unique categories:", df['category'].unique())
