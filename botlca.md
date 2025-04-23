@@ -402,7 +402,4 @@ plt.show()
 <ipython-input-14-bb48b4cee2d7>:9: DtypeWarning: Columns (20,38) have mixed types. Specify dtype option on import or set low_memory=False.
   df = pd.read_csv("combined_dataset.csv")
 
-
-
-
-![download](https://github.com/user-attachments/assets/3432eb2e-9ed5-4ed1-839e-044abfa2dac3)
+![download](https://github.com/user-attachments/assets/582bd934-3bd4-4d91-b173-58f1e313de4c)
