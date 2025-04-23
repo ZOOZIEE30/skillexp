@@ -226,9 +226,9 @@ Unique subcategories: ['UDP' 'Normal' 'OS_Fingerprint' 'Service_Scan' 'Data_Exfi
  'Keylogging']
 Total DoS records: 0
 Total ReDoS records: 0
-
+```
 ![download](https://github.com/user-attachments/assets/2730fab7-73ca-4174-a8e6-0cb4c66c080f)
-
+```
 No ReDoS records found in the dataset.
 ```
 #### Data Cleaning and Preprocessing Steps
