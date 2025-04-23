@@ -52,95 +52,127 @@ This shows the correlation between features, helping identify relationships.
 - **Statistical Summary**: Descriptive stats using `.describe()`.
 
 ## Code & Output:
-
-```python
-# Importing libraries
+###Libraries used and Merging and Loading the dataset  
+```
 import pandas as pd
-import numpy as np
-import seaborn as sns
+import glob
+import os
+
+# Get all CSV files in the current directory
+csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_1.csv')
+csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_2.csv')
+csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_3.csv')
+csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_4.csv')
+
+# Step 2: Parameters
+chunk_size = 100000  # Adjust based on memory
+data_chunks = []
+
+print(" Starting to read and combine all datasets...")
+
+# Step 3: Read each file in chunks and append to the list
+for file in csv_files:
+    print(f" Processing file: {file}")
+    try:
+        for chunk in pd.read_csv(file, chunksize=chunk_size):
+            data_chunks.append(chunk)
+    except Exception as e:
+        print(f" Error reading {file}: {e}")
+
+# Step 4: Concatenate all chunks (handles different columns automatically)
+print("🔗 Concatenating all chunks into one DataFrame...")
+combined_df = pd.concat(data_chunks, ignore_index=True, sort=True)
+
+# Step 5: Save to a new CSV
+output_file = 'combined_dataset.csv'
+combined_df.to_csv(output_file, index=False)
+print(f" Done! Combined dataset with all rows and attributes saved as '{output_file}'")
+
+# Step 6: Sanity check
+print("\n Final dataset info:")
+print(f"Total rows: {combined_df.shape[0]}")
+print(f"Total columns: {combined_df.shape[1]}")
+print(f"Column names: {combined_df.columns.tolist()}")
+```
+#### output 
+```
+Starting to read and combine all datasets...
+ Processing file: /content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_4.csv
+<ipython-input-3-7200f5717dd2>:21: DtypeWarning: Columns (7,9) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_csv(file, chunksize=chunk_size):
+<ipython-input-3-7200f5717dd2>:21: DtypeWarning: Columns (7,9) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_csv(file, chunksize=chunk_size):
+<ipython-input-3-7200f5717dd2>:21: DtypeWarning: Columns (7,9) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_csv(file, chunksize=chunk_size):
+<ipython-input-3-7200f5717dd2>:21: DtypeWarning: Columns (7,9) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_csv(file, chunksize=chunk_size):
+<ipython-input-3-7200f5717dd2>:21: DtypeWarning: Columns (7,9) have mixed types. Specify dtype option on import or set low_memory=False.
+  for chunk in pd.read_csv(file, chunksize=chunk_size):
+🔗 Concatenating all chunks into one DataFrame...
+ Done! Combined dataset with all rows and attributes saved as 'combined_dataset.csv'
+
+ Final dataset info:
+Total rows: 668522
+Total columns: 46
+Column names: ['AR_P_Proto_P_Dport', 'AR_P_Proto_P_DstIP', 'AR_P_Proto_P_Sport', 'AR_P_Proto_P_SrcIP', 'N_IN_Conn_P_DstIP', 'N_IN_Conn_P_SrcIP', 'Pkts_P_State_P_Protocol_P_DestIP', 'Pkts_P_State_P_Protocol_P_SrcIP', 'TnBPDstIP', 'TnBPSrcIP', 'TnP_PDstIP', 'TnP_PSrcIP', 'TnP_PerProto', 'TnP_Per_Dport', 'attack', 'bytes', 'category', 'daddr', 'dbytes', 'dpkts', 'dport', 'drate', 'dur', 'flgs', 'flgs_number', 'ltime', 'max', 'mean', 'min', 'pkSeqID', 'pkts', 'proto', 'proto_number', 'rate', 'saddr', 'sbytes', 'seq', 'spkts', 'sport', 'srate', 'state', 'state_number', 'stddev', 'stime', 'subcategory', 'sum']
+```
+### Reads a CSV file into a DataFrame
+```
+df = pd.read_csv('combined_dataset.csv')
+
+```
+### shape :number of rows and coloumns 
+
+```
+df.shape
+
+```
+#### output 
+```
+(668522, 46)
+```
+### Analyze the Distribution of Attack vs Non-Attack Records
+```
+# Calculate percentage of attack and non-attack records
+attack_percentages = df['attack'].value_counts(normalize=True) * 100
+
+# Rename index values for readability (optional)
+attack_percentages.index = ['Non-Attack' if val == 0 else 'Attack' for val in attack_percentages.index]
+
+# Display the results
+print(attack_percentages)
+```
+#### output 
+```
+Attack        99.928649
+Non-Attack     0.071351
+Name: proportion, dtype: float64
+```
+### Visualizing Attack vs Non-Attack Records (Bar Chart & Pie Chart)
+
+```
 import matplotlib.pyplot as plt
-import warnings
-warnings.filterwarnings('ignore')
+# Value counts and percentages
+counts = df['attack'].value_counts()
+labels = ['Non-Attack' if val == 0 else 'Attack' for val in counts.index]
+percentages = (counts / counts.sum()) * 100
 
-# Load dataset
-df = pd.read_csv("/content/LoanApprovalPrediction.csv")
-df.head()
-```
+# Plot 1: Bar chart
+plt.figure(figsize=(10, 5))
+plt.subplot(1, 2, 1)
+plt.bar(labels, counts, color=['blue', 'green'])
+plt.title("Count of Attack vs Non-Attack")
+plt.ylabel("Number of Records")
 
-```output
-   Loan_ID Gender Married Dependents Education Self_Employed  ApplicantIncome  ...
-0  LP001002   Male     No          0  Graduate            No             5849
-1  LP001003   Male    Yes          1  Graduate            No             4583
-...
-```
+# Plot 2: Pie chart
+plt.subplot(1, 2, 2)
+plt.pie(percentages, labels=labels, autopct='%1.1f%%', colors=['yellow', 'red'])
+plt.title("Percentage of Attack vs Non-Attack")
 
-```python
-# Checking data structure
-df.info()
-```
-
-```output
-<class 'pandas.core.frame.DataFrame'>
-RangeIndex: 614 entries, 0 to 613
-Data columns (total 13 columns):
-...
-```
-
-```python
-# Count of missing values
-df.isnull().sum()
-```
-
-```output
-Gender               13
-Married               3
-Dependents           15
-...
-```
-
-```python
-# Filling missing values
-df['Gender'].fillna(df['Gender'].mode()[0], inplace=True)
-df['LoanAmount'].fillna(df['LoanAmount'].mean(), inplace=True)
-...
-```
-
-```python
-# Histogram
-df['ApplicantIncome'].hist(bins=50)
-plt.title("Applicant Income Distribution")
+plt.tight_layout()
 plt.show()
 ```
+#### output 
+![download](https://github.com/user-attachments/assets/cef74a9a-1ad4-4d25-b60c-387bd99282b3)
 
-```python
-# Box Plot
-sns.boxplot(x='Education', y='ApplicantIncome', data=df)
-plt.title("Income vs Education")
-plt.show()
-```
-
-```python
-# Count Plot
-sns.countplot(x='Loan_Status', hue='Gender', data=df)
-plt.title("Loan Approval by Gender")
-plt.show()
-```
-
-```python
-# Correlation Heatmap
-sns.heatmap(df.corr(), annot=True, cmap="coolwarm")
-plt.title("Correlation Heatmap")
-plt.show()
-```
-
-```python
-# Summary Statistics
-df.describe()
-```
-
-```output
-       ApplicantIncome  CoapplicantIncome  LoanAmount  Loan_Amount_Term  Credit_History
-count       614.000000         614.000000  614.000000         614.000000      614.000000
-mean        5403.459283        1621.245798  146.412162         342.000000        0.842199
-...
-```
+####
