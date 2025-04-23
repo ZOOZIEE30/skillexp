@@ -403,4 +403,133 @@ plt.show()
   df = pd.read_csv("combined_dataset.csv")
 ```
 ![download](https://github.com/user-attachments/assets/582bd934-3bd4-4d91-b173-58f1e313de4c)
+```
+Top correlated features with 'attack':
+ tnp_perproto     0.804492
+tnbpsrcip        0.286662
+tnp_psrcip       0.271961
+tnbpdstip        0.257517
+spkts            0.254837
+sum              0.253827
+tnp_pdstip       0.238696
+pkts             0.232891
+sbytes           0.228514
+tnp_per_dport    0.212446
+Name: attack, dtype: float64
+```
+Low-varianc![download](https://github.com/user-attachments/assets/1fefa1a3-9c8b-4356-b9f6-f477cf6e4402)
+```
+e filter selected features: ['ar_p_proto_p_dport', 'ar_p_proto_p_dstip', 'ar_p_proto_p_sport', 'ar_p_proto_p_srcip', 'n_in_conn_p_dstip', 'n_in_conn_p_srcip', 'pkts_p_state_p_protocol_p_destip', 'pkts_p_state_p_protocol_p_srcip', 'tnbpdstip', 'tnbpsrcip', 'tnp_pdstip', 'tnp_psrcip', 'tnp_perproto', 'tnp_per_dport', 'bytes', 'dbytes', 'dpkts', 'drate', 'dur', 'flgs_number', 'ltime', 'max', 'mean', 'min', 'pkseqid', 'pkts', 'proto_number', 'rate', 'sbytes', 'seq', 'spkts', 'srate', 'state_number', 'stddev', 'stime', 'sum']
 
+Top features using Chi2:
+ tnbpsrcip       1.076362e+12
+bytes           9.954825e+11
+tnbpdstip       6.625210e+11
+sbytes          6.282214e+11
+dbytes          3.990383e+11
+tnp_perproto    4.691692e+09
+srate           1.191208e+09
+dpkts           3.155281e+08
+pkts            2.426495e+08
+spkts           1.368482e+08
+dtype: float64
+<ipython-input-14-bb48b4cee2d7>:57: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(x=importances[:10], y=importances.index[:10], palette='viridis')
+
+
+
+
+```
+![download](https://github.com/user-attachments/assets/5218f1f8-46b9-46b8-9057-81aa875d214c)
+
+```
+### print some rows 
+
+```
+df.head()
+```
+
+### Random Forest Classification with Bagging and Model Evaluation
+```
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import classification_report, accuracy_score
+from sklearn.preprocessing import LabelEncoder
+
+# Encode the target column
+le = LabelEncoder()
+y = le.fit_transform(df['attack'])
+
+# Features (drop the target)
+X = df.drop(columns=['attack'])
+
+# Split the dataset
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Bagging: Random Forest
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+
+# Predictions
+y_pred = rf.predict(X_test)
+
+# Evaluation
+print("Random Forest (Bagging) Results:")
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print(classification_report(y_test, y_pred))
+
+```
+#### output 
+
+```
+Random Forest (Bagging) Results:
+Accuracy: 1.0
+              precision    recall  f1-score   support
+
+           0       1.00      1.00      1.00       100
+           1       1.00      1.00      1.00    133605
+
+    accuracy                           1.00    133705
+   macro avg       1.00      1.00      1.00    133705
+weighted avg       1.00      1.00      1.00    133705
+
+```
+
+### XGBoost Classification: Model Training and Accuracy Evaluation
+
+```
+from xgboost import XGBClassifier
+from sklearn.metrics import accuracy_score
+
+# Initialize and train the model
+model = XGBClassifier(use_label_encoder=False, eval_metric='logloss', random_state=42)
+model.fit(X_train, y_train)
+
+# Train Accuracy
+train_pred = model.predict(X_train)
+train_acc = accuracy_score(y_train, train_pred)
+
+# Test Accuracy
+test_pred = model.predict(X_test)
+test_acc = accuracy_score(y_test, test_pred)
+
+print("XGBoost Accuracy:")
+print(f"Train Accuracy: {train_acc:.4f}")
+print(f"Test Accuracy:  {test_acc:.4f}")
+
+```
+
+#### output 
+
+```
+/usr/local/lib/python3.11/dist-packages/xgboost/core.py:158: UserWarning: [17:13:47] WARNING: /workspace/src/learner.cc:740: 
+Parameters: { "use_label_encoder" } are not used.
+
+  warnings.warn(smsg, UserWarning)
+XGBoost Accuracy:
+Train Accuracy: 1.0000
+Test Accuracy:  1.0000
+```
