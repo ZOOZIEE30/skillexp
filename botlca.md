@@ -228,6 +228,8 @@ Total DoS records: 0
 Total ReDoS records: 0
 ```
 ![download](https://github.com/user-attachments/assets/2730fab7-73ca-4174-a8e6-0cb4c66c080f)
+![download](https://github.com/user-attachments/assets/5b32dee0-0e23-4ae6-90c3-44892581621d)
+
 ```
 No ReDoS records found in the dataset.
 ```
@@ -241,6 +243,7 @@ missing = df.isnull().sum()
 print("Missing values:\n", missing[missing > 0])
 
 # Optional: Fill or drop based on strategy
+![download](https://github.com/user-attachments/assets/1792e3f4-41c9-441c-aacc-36b133f93413)
 # df.fillna(method='ffill', inplace=True)   # Forward fill
 # df.dropna(inplace=True)                   # Drop rows with any NaN
 
