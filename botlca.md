@@ -416,9 +416,7 @@ pkts             0.232891
 sbytes           0.228514
 tnp_per_dport    0.212446
 Name: attack, dtype: float64
-```
-Low-varianc![download](https://github.com/user-attachments/assets/1fefa1a3-9c8b-4356-b9f6-f477cf6e4402)
-```
+
 e filter selected features: ['ar_p_proto_p_dport', 'ar_p_proto_p_dstip', 'ar_p_proto_p_sport', 'ar_p_proto_p_srcip', 'n_in_conn_p_dstip', 'n_in_conn_p_srcip', 'pkts_p_state_p_protocol_p_destip', 'pkts_p_state_p_protocol_p_srcip', 'tnbpdstip', 'tnbpsrcip', 'tnp_pdstip', 'tnp_psrcip', 'tnp_perproto', 'tnp_per_dport', 'bytes', 'dbytes', 'dpkts', 'drate', 'dur', 'flgs_number', 'ltime', 'max', 'mean', 'min', 'pkseqid', 'pkts', 'proto_number', 'rate', 'sbytes', 'seq', 'spkts', 'srate', 'state_number', 'stddev', 'stime', 'sum']
 
 Top features using Chi2:
@@ -445,7 +443,7 @@ Passing `palette` without assigning `hue` is deprecated and will be removed in v
 ```
 ![download](https://github.com/user-attachments/assets/5218f1f8-46b9-46b8-9057-81aa875d214c)
 
-```
+
 ### print some rows 
 
 ```
