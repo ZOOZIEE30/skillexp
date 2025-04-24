@@ -234,69 +234,6 @@ plt.show()
 
 
 
-
-### Exploring DoS and ReDoS Attack Patterns in the Dataset
-```
-# Preview category/subcategory values
-print("Unique categories:", df['category'].unique())
-print("Unique subcategories:", df['subcategory'].unique())
-
-# Filter ![download](https://github.com/user-attachments/assets/0c9bc2cd-3a24-448b-9ba7-bea058919c0d)
-DoS and ReDoS records
-dos_df = df[df['subcategory'].str.contains('DoS', case=False, na=False)]
-redos_df = df[df['subcategory'].str.contains('ReDoS', case=False, na=False)]
-
-# Print basic stats
-prin![download](https://github.com/user-attachments/assets/802615fa-b29c-4e3f-84d8-fbc4aca16981)
-t("Tot![download](https://github.com/user-attachments/assets/f8c689f5-fad1-453c-94bf-078747457658)
-al DoS records:", len(dos_df))
-print("Total ReDoS records:", len(redos_df))
-
-# Compare features for DoS attacks
-plt.figure(figsize=(10, 5))
-sns.boxplot(data=dos_df[['pkts', 'bytes']], palette='coolwarm')
-plt.title("DoS![download](https://github.com/user-attachments/assets/4e94d8b5-d5bd-4405-b64f-8946b745a201)
- Attack Packet & Byte Distribution")
-plt.ylabel("Value")
-plt.show()
-
-# Compare DoS to Non-Attack traffic
-non_attack_df = df[df['attack'] == 0]
-combined = pd.concat([
-    dos_df.assign(type='DoS'),
-    non_attack_df.assign(type='Non-Attack')
-])
-
-plt.figure(figsize=(12, 5))
-sns.boxplot(x='type', y='pkts', data=combined)
-plt.title("DoS vs Non-Attack: Packet Count")
-plt.show()
-
-# ReDoS-specific analysis
-if len(redos_df) > 0:
-    plt.figure(figsize=(10, 5))
-    sns.histplot(redos_df['dur'], bins=30, kde=True, color='purple')
-    plt.title("ReDoS Duration Distribution")
-    plt.xlabel("Duration")
-    plt.ylabel("Frequency")
-    plt.show()
-else:
-    print(" No ReDoS records found in the dataset.")
-```
-#### output 
-```
-Unique categories: ['DDoS' 'Normal' 'Reconnaissance' 'Theft']
-Unique subcategories: ['UDP' 'Normal' 'OS_Fingerprint' 'Service_Scan' 'Data_Exfiltration'
- 'Keylogging']
-Total DoS records: 0
-Total ReDoS records: 0
-```
-![download](https://github.com/user-attachments/assets/2730fab7-73ca-4174-a8e6-0cb4c66c080f)
-![download](https://github.com/user-attachments/assets/5b32dee0-0e23-4ae6-90c3-44892581621d)
-
-```
-No ReDoS records found in the dataset.
-```
 #### Data Cleaning and Preprocessing Steps
 ```
 # 1. Standardize column names (strip spaces, lowercase, replace spaces with underscores)
