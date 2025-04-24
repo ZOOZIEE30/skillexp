@@ -56,13 +56,16 @@ This shows the correlation between features, helping identify relationships.
 ```
 import pandas as pd
 import glob
-import os
 
-# Get all CSV files in the current directory
-csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_1.csv')
-csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_2.csv')
-csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_3.csv')
-csv_files = glob.glob('/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_4.csv')
+
+# Specify the CSV file paths directly
+csv_files = [
+    '/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_1.csv',
+    '/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_2.csv',
+    '/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_3.csv',
+    '/content/drive/MyDrive/UNSW_2018_IoT_Botnet_Full5pc_4.csv'
+]
+
 
 # Step 2: Parameters
 chunk_size = 100000  # Adjust based on memory
@@ -93,6 +96,7 @@ print("\n Final dataset info:")
 print(f"Total rows: {combined_df.shape[0]}")
 print(f"Total columns: {combined_df.shape[1]}")
 print(f"Column names: {combined_df.columns.tolist()}")
+
 ```
 #### output 
 ```
@@ -175,24 +179,83 @@ plt.show()
 #### output 
 ![download](https://github.com/user-attachments/assets/cef74a9a-1ad4-4d25-b60c-387bd99282b3)
 
+### balancing the data 
+```
+import pandas as pd
+import numpy as np
+
+# Simulating 'combined_df' based on your sample
+# Assuming your dataset has 3668522 non-attack records and no attack records
+# First, let's create some synthetic data for attack cases
+
+# Define number of attack records (synthetic)
+num_attack = 1000  # For example, let's create 1000 attack records
+
+# Generate synthetic 'attack' data (random values for illustration purposes)
+attack_data = {
+    'pkts': np.random.randint(1, 100, size=num_attack),
+    'bytes': np.random.randint(100, 5000, size=num_attack),
+    'dur': np.random.uniform(0.01, 10, size=num_attack),
+    'attack': np.ones(num_attack)  # Label as '1' for attack
+}
+
+# Convert to DataFrame
+attack_df = pd.DataFrame(attack_data)
+
+# Simulate the non-attack data (already in your dataset)
+non_attack_df = combined_df[combined_df['attack'] == 0].sample(num_attack, random_state=42)
+
+# Combine both attack and non-attack data
+combined_balanced_df = pd.concat([attack_df, non_attack_df])
+
+# Shuffle the combined DataFrame
+combined_balanced_df = combined_balanced_df.sample(frac=1, random_state=42).reset_index(drop=True)
+
+# Check the new balance of the dataset
+print(combined_balanced_df['attack'].value_counts())
+
+# Visualize the distribution after balancing
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(10, 6))
+sns.countplot(x='attack', data=combined_balanced_df, palette='Set2')
+plt.title("Balanced Attack vs Non-Attack Distribution")
+plt.xlabel("Attack (0 = Non-Attack, 1 = Attack)")
+plt.ylabel("Count")
+plt.show()
+```
+#### output 
+
+
+
+![download (1)](https://github.com/user-attachments/assets/8180f8b3-bf97-4733-9058-f4697b14a63e)
+
+
+
+
 ### Exploring DoS and ReDoS Attack Patterns in the Dataset
 ```
 # Preview category/subcategory values
 print("Unique categories:", df['category'].unique())
 print("Unique subcategories:", df['subcategory'].unique())
 
-# Filter DoS and ReDoS records
+# Filter ![download](https://github.com/user-attachments/assets/0c9bc2cd-3a24-448b-9ba7-bea058919c0d)
+DoS and ReDoS records
 dos_df = df[df['subcategory'].str.contains('DoS', case=False, na=False)]
 redos_df = df[df['subcategory'].str.contains('ReDoS', case=False, na=False)]
 
 # Print basic stats
-print("Total DoS records:", len(dos_df))
+prin![download](https://github.com/user-attachments/assets/802615fa-b29c-4e3f-84d8-fbc4aca16981)
+t("Tot![download](https://github.com/user-attachments/assets/f8c689f5-fad1-453c-94bf-078747457658)
+al DoS records:", len(dos_df))
 print("Total ReDoS records:", len(redos_df))
 
 # Compare features for DoS attacks
 plt.figure(figsize=(10, 5))
 sns.boxplot(data=dos_df[['pkts', 'bytes']], palette='coolwarm')
-plt.title("DoS Attack Packet & Byte Distribution")
+plt.title("DoS![download](https://github.com/user-attachments/assets/4e94d8b5-d5bd-4405-b64f-8946b745a201)
+ Attack Packet & Byte Distribution")
 plt.ylabel("Value")
 plt.show()
 
@@ -337,115 +400,91 @@ dtype: object
 ### Feature Selection and Importance Evaluation
 ```
 import pandas as pd
-import matplotlib.pyplot as plt
+import numpy as np
 import seaborn as sns
-from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.feature_selection import SelectKBest, f_classif
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.preprocessing import LabelEncoder
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import StandardScaler
+from imblearn.over_sampling import SMOTE
 
-# Load dataset
-df = pd.read_csv("combined_dataset.csv")
+# Assuming 'combined_balanced_df' is the balanced dataset you created earlier
 
-# Standardize column names
-df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+# Define features and target variable
+features = ['pkts', 'bytes', 'dur']  # Adjust or add more features if necessary
+X = combined_balanced_df[features]
+y = combined_balanced_df['attack']
 
-# Drop non-numeric and irrelevant columns (keep for EDA if needed)
-df = df.select_dtypes(include=['int64', 'float64'])
+#  Step 1: Split Data into Train and Test Sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, stratify=y, random_state=42)
 
-# 1. Correlation with target
-plt.figure(figsize=(12, 10))
-cor = df.corr()
-sns.heatmap(cor, cmap='coolwarm', annot=False)
-plt.title('Correlation Heatmap')
-plt.show()
+#  Step 2: Feature Selection - Filter Method (SelectKBest)
+filter_selector = SelectKBest(score_func=f_classif, k=2)  # Select top 2 features based on ANOVA F-test
+X_train_filter = filter_selector.fit_transform(X_train, y_train)
+X_test_filter = filter_selector.transform(X_test)
 
-# Display top features correlated with 'attack'
-top_corr = cor['attack'].abs().sort_values(ascending=False)[1:11]
-print("Top correlated features with 'attack':\n", top_corr)
+# Get selected feature indices
+selected_filter_features = filter_selector.get_support(indices=True)
 
-# 2. Remove low-variance features
-selector = VarianceThreshold(threshold=0.01)
-reduced_data = selector.fit_transform(df.drop('attack', axis=1))
-selected_features = df.drop('attack', axis=1).columns[selector.get_support()]
+#  Step 3: Feature Selection - Embedded Method (Random Forest)
+rf = RandomForestClassifier(random_state=42)
+rf.fit(X_train, y_train)
 
-print("\nLow-variance filter selected features:", list(selected_features))
+# Get feature importances and select top 2 important features
+importances = rf.feature_importances_
+top_n = 4
+top_n_indices = importances.argsort()[-top_n:]
 
-# 3. Univariate selection (Chi2)
-# Must be positive values for chi2
-df_chi = df.fillna(0).copy()
-X = df_chi.drop('attack', axis=1)
-y = df_chi['attack']
+# Combine selected features from both methods
+selected_features = np.union1d(selected_filter_features, top_n_indices)
 
-# Apply chi-squared
-selector_chi = SelectKBest(score_func=chi2, k=10)
-selector_chi.fit(X, y)
-chi_scores = pd.Series(selector_chi.scores_, index=X.columns)
-chi_scores = chi_scores.sort_values(ascending=False)
-print("\nTop features using Chi2:\n", chi_scores.head(10))
+#  Step 4: Create New Training and Test Data with Selected Features
+X_train_selected = X_train.iloc[:, selected_features]
+X_test_selected = X_test.iloc[:, selected_features]
 
-# 4. Feature importance using Random Forest
-model = RandomForestClassifier(n_estimators=100, random_state=42)
-model.fit(X, y)
+# Step 5: Scale Features (Important for algorithms like Random Forest)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train_selected)
+X_test_scaled = scaler.transform(X_test_selected)
 
-importances = pd.Series(model.feature_importances_, index=X.columns)
-importances = importances.sort_values(ascending=False)
+#  Step 6: Train the Final Model (RandomForestClassifier)
+clf = RandomForestClassifier(random_state=42)
+clf.fit(X_train_scaled, y_train)
 
-# Plot top features
-plt.figure(figsize=(10, 6))
-sns.barplot(x=importances[:10], y=importances.index[:10], palette='viridis')
-plt.title("Top 10 Important Features (Random Forest)")
-plt.xlabel("Importance Score")
+#  Step 7: Make Predictions and Evaluate the Model
+y_pred = clf.predict(X_test_scaled)
+
+# Classification Report
+print("\nClassification Report:\n")
+print(classification_report(y_test, y_pred))
+
+#  Step 8: Feature Importance from Random Forest (for interpretation)
+plt.figure(figsize=(8, 6))
+sns.barplot(x=rf.feature_importances_[top_n_indices], y=[features[i] for i in top_n_indices])
+plt.title("Top 3 Important Features Based on Random Forest")
+plt.xlabel("Feature Importance")
 plt.ylabel("Feature")
 plt.show()
+
 ```
 
 #### output 
 
 ```
-<ipython-input-14-bb48b4cee2d7>:9: DtypeWarning: Columns (20,38) have mixed types. Specify dtype option on import or set low_memory=False.
-  df = pd.read_csv("combined_dataset.csv")
+Classification Report:
+
+              precision    recall  f1-score   support
+
+         0.0       0.99      1.00      1.00       200
+         1.0       1.00      0.99      0.99       200
+
+    accuracy                           0.99       400
+   macro avg       1.00      0.99      0.99       400
+weighted avg       1.00      0.99      0.99       400
 ```
-![download](https://github.com/user-attachments/assets/582bd934-3bd4-4d91-b173-58f1e313de4c)
-```
-Top correlated features with 'attack':
- tnp_perproto     0.804492
-tnbpsrcip        0.286662
-tnp_psrcip       0.271961
-tnbpdstip        0.257517
-spkts            0.254837
-sum              0.253827
-tnp_pdstip       0.238696
-pkts             0.232891
-sbytes           0.228514
-tnp_per_dport    0.212446
-Name: attack, dtype: float64
-
-e filter selected features: ['ar_p_proto_p_dport', 'ar_p_proto_p_dstip', 'ar_p_proto_p_sport', 'ar_p_proto_p_srcip', 'n_in_conn_p_dstip', 'n_in_conn_p_srcip', 'pkts_p_state_p_protocol_p_destip', 'pkts_p_state_p_protocol_p_srcip', 'tnbpdstip', 'tnbpsrcip', 'tnp_pdstip', 'tnp_psrcip', 'tnp_perproto', 'tnp_per_dport', 'bytes', 'dbytes', 'dpkts', 'drate', 'dur', 'flgs_number', 'ltime', 'max', 'mean', 'min', 'pkseqid', 'pkts', 'proto_number', 'rate', 'sbytes', 'seq', 'spkts', 'srate', 'state_number', 'stddev', 'stime', 'sum']
-
-Top features using Chi2:
- tnbpsrcip       1.076362e+12
-bytes           9.954825e+11
-tnbpdstip       6.625210e+11
-sbytes          6.282214e+11
-dbytes          3.990383e+11
-tnp_perproto    4.691692e+09
-srate           1.191208e+09
-dpkts           3.155281e+08
-pkts            2.426495e+08
-spkts           1.368482e+08
-dtype: float64
-<ipython-input-14-bb48b4cee2d7>:57: FutureWarning: 
-
-Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
-
-  sns.barplot(x=importances[:10], y=importances.index[:10], palette='viridis')
-
-
-
-
-```
-![download](https://github.com/user-attachments/assets/5218f1f8-46b9-46b8-9057-81aa875d214c)
-
+![download (2)](https://github.com/user-attachments/assets/03259d99-250f-4b44-a0b6-8239bf02547e)
 
 ### print some rows 
 
@@ -534,3 +573,57 @@ XGBoost Accuracy:
 Train Accuracy: 1.0000
 Test Accuracy:  1.0000
 ```
+
+### confusion matrix and roc curve 
+
+```
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, roc_curve, auc
+import matplotlib.pyplot as plt
+
+# Confusion Matrix with class names
+def plot_confusion_matrix(y_true, y_pred, model_name="Model"):
+    # Define labels if your target has binary classes: 0 = Normal, 1 = Attack
+    labels = ["Normal", "Attack"]
+
+    cm = confusion_matrix(y_true, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=labels)
+    disp.plot(cmap='Blues')
+    plt.title(f"Confusion Matrix - {model_name}")
+    plt.xlabel("Predicted Label")
+    plt.ylabel("True Label")
+    plt.grid(False)
+    plt.show()
+
+# ROC Curve
+def plot_roc_curve(model, X_test, y_test, model_name="Model"):
+    # Get probability scores or decision function
+    if hasattr(model, "predict_proba"):
+        y_score = model.predict_proba(X_test)[:, 1]
+    else:
+        y_score = model.decision_function(X_test)
+
+    # Compute ROC
+    fpr, tpr, _ = roc_curve(y_test, y_score)
+    roc_auc = auc(fpr, tpr)
+
+    # Plot
+    plt.figure()
+    plt.plot(fpr, tpr, color='darkorange', lw=2, label=f"ROC Curve (AUC = {roc_auc:.2f})")
+    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title(f'ROC Curve - {model_name}')
+    plt.legend(loc="lower right")
+    plt.grid(True)
+    plt.show()
+
+# Call the functions
+plot_confusion_matrix(y_test, y_pred, model_name="Random Forest")
+plot_roc_curve(model, X_test, y_test, model_name="Random Forest")
+```
+#### output 
+
+![download (3)](https://github.com/user-attachments/assets/82ed211e-c3dd-4a81-a934-89936385af7f)
+![download (4)](https://github.com/user-attachments/assets/743255c0-3367-4ca3-a835-2fa7376088ee)
