@@ -627,3 +627,106 @@ plot_roc_curve(model, X_test, y_test, model_name="Random Forest")
 
 ![download (3)](https://github.com/user-attachments/assets/82ed211e-c3dd-4a81-a934-89936385af7f)
 ![download (4)](https://github.com/user-attachments/assets/743255c0-3367-4ca3-a835-2fa7376088ee)
+
+### correlation and random forest 
+
+```
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.feature_selection import SelectKBest, chi2, VarianceThreshold
+from sklearn.ensemble import RandomForestClassifier
+
+# Load and prepare dataset
+df = pd.read_csv("combined_dataset.csv")
+df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+
+# Keep only numeric columns for feature selection
+df_numeric = df.select_dtypes(include=['int64', 'float64']).copy()
+
+# Step 1: Correlation-based Filter
+plt.figure(figsize=(12, 10))
+correlation_matrix = df_numeric.corr()
+sns.heatmap(correlation_matrix, cmap='coolwarm', annot=False)
+plt.title('Correlation Heatmap')
+plt.show()
+
+# Show top features correlated with target 'attack'
+top_corr_features = correlation_matrix['attack'].abs().sort_values(ascending=False)[1:11]
+print("Top 10 features correlated with 'attack':\n", top_corr_features)
+
+# Step 2: Low-Variance Filter
+X_no_target = df_numeric.drop(columns=['attack'])
+y = df_numeric['attack']
+variance_selector = VarianceThreshold(threshold=0.01)
+X_var_filtered = variance_selector.fit_transform(X_no_target)
+features_var_kept = X_no_target.columns[variance_selector.get_support()]
+print("\nLow-variance filter selected features:", list(features_var_kept))
+
+# Step 3: Chi-Squared Test (requires non-negative values)
+X_filled = X_no_target.fillna(0).clip(lower=0)  # clip to ensure non-negativity
+chi_selector = SelectKBest(score_func=chi2, k=10)
+chi_selector.fit(X_filled, y)
+chi_scores = pd.Series(chi_selector.scores_, index=X_filled.columns)
+top_chi_features = chi_scores.sort_values(ascending=False).head(10)
+print("\nTop 10 features using Chi2:\n", top_chi_features)
+
+# Step 4: Random Forest for Feature Importance (Wrapper method)
+forest_model = RandomForestClassifier(n_estimators=100, random_state=42)
+forest_model.fit(X_no_target.fillna(0), y)
+
+rf_importances = pd.Series(forest_model.feature_importances_, index=X_no_target.columns)
+top_rf_features = rf_importances.sort_values(ascending=False).head(10)
+
+# Plot top features
+plt.figure(figsize=(10, 6))
+sns.barplot(x=top_rf_features.values, y=top_rf_features.index, palette='viridis')
+plt.title("Top 10 Important Features (Random Forest)")
+plt.xlabel("Importance Score")
+plt.ylabel("Feature")
+plt.tight_layout()
+plt.show()
+```
+#### output 
+```
+<ipython-input-21-20f165cb381f>:8: DtypeWarning: Columns (20,38) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv("combined_dataset.csv")
+```
+![download (5)](https://github.com/user-attachments/assets/d488a0ff-6d89-4fa8-b3fb-16a72c2f9aff)
+```
+Top 10 features correlated with 'attack':
+ tnp_perproto     0.804492
+tnbpsrcip        0.286662
+tnp_psrcip       0.271961
+tnbpdstip        0.257517
+spkts            0.254837
+sum              0.253827
+tnp_pdstip       0.238696
+pkts             0.232891
+sbytes           0.228514
+tnp_per_dport    0.212446
+Name: attack, dtype: float64
+
+Low-variance filter selected features: ['ar_p_proto_p_dport', 'ar_p_proto_p_dstip', 'ar_p_proto_p_sport', 'ar_p_proto_p_srcip', 'n_in_conn_p_dstip', 'n_in_conn_p_srcip', 'pkts_p_state_p_protocol_p_destip', 'pkts_p_state_p_protocol_p_srcip', 'tnbpdstip', 'tnbpsrcip', 'tnp_pdstip', 'tnp_psrcip', 'tnp_perproto', 'tnp_per_dport', 'bytes', 'dbytes', 'dpkts', 'drate', 'dur', 'flgs_number', 'ltime', 'max', 'mean', 'min', 'pkseqid', 'pkts', 'proto_number', 'rate', 'sbytes', 'seq', 'spkts', 'srate', 'state_number', 'stddev', 'stime', 'sum']
+
+Top 10 features using Chi2:
+ tnbpsrcip       1.076362e+12
+bytes           9.954825e+11
+tnbpdstip       6.625210e+11
+sbytes          6.282214e+11
+dbytes          3.990383e+11
+tnp_perproto    4.691692e+09
+srate           1.191208e+09
+dpkts           3.155281e+08
+pkts            2.426495e+08
+spkts           1.368482e+08
+dtype: float64
+<ipython-input-21-20f165cb381f>:50: FutureWarning: 
+
+Passing `palette` without assigning `hue` is deprecated and will be removed in v0.14.0. Assign the `y` variable to `hue` and set `legend=False` for the same effect.
+
+  sns.barplot(x=top_rf_features.values, y=top_rf_features.index, palette='viridis')
+```
+![download (6)](https://github.com/user-attachments/assets/4ed83aa5-b591-4583-8ffc-d441f22fcfd9)
+
+
